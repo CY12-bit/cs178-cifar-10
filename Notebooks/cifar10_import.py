@@ -3,6 +3,7 @@ from keras.datasets import cifar10
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import cv2
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -27,4 +28,14 @@ def importCifar10(type = "split"):
         return (x,y)
     else: 
         return None
+    
+
+def grayScale(x_images:np.array) -> np.array:
+    grayScaled = list()
+    for x in x_images:
+        gray = cv2.cvtColor(x, cv2.COLOR_RGB2GRAY)
+        grayScaled.append(gray)
+    
+    return np.array(grayScaled)
+
 
