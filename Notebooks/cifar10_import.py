@@ -32,19 +32,33 @@ def importCifar10(type = "split"):
     else: 
         return None
 
-def prepareX(x, x_test = None, gray_scale = False, scaled = True):
-    """
-    Function flattens x to be a 2d array and conditionally standardizes it.
-    """
+
+def flattenImageSet(images, gray = False):
+    col_size = 3072 if gray == False else 1024
+    images = images.flatten().reshape(len(images),col_size)
+    return images
+
+def scaleImages(images, scalar = None):
+    if scalar == None:
+        scalar = StandardScaler()
+        x_scaled = scalar.fit_transform(images)
+        return (x_scaled,scalar)
+    else:
+        images = scalar.transform(images)
+        return images
+
+"""
+def prepareX(x, x_test = None, x_val = None, gray_scale = False, scaled = True):
     col_size = 3072 if gray_scale == False else 1024
 
     x_scaled = x.flatten().reshape(len(x),col_size)
     if scaled == True:
         scalar = StandardScaler()
         x_scaled = scalar.fit_transform(x_scaled)
-        return (x_scaled, scalar.transform(x_test.flatten().reshape(len(x_test),col_size))) if type(x_test) != type(None) else x_scaled
+        return (x_scaled, scalar.transform(x_test.flatten().reshape(len(x_test),col_size)),scalar) if type(x_test) != type(None) else (x_scaled,scalar)
     else:
-        return (x_scaled, x_test.flatten().reshape(len(x_test),col_size)) if type(x_test) != type(None) else x_scaled
+        return (x_scaled, x_test.flatten().reshape(len(x_test),col_size),None) if type(x_test) != type(None) else (x_scaled,None)
+"""
 
 def grayScaleData(*args):
     """
@@ -55,13 +69,15 @@ def grayScaleData(*args):
         for x_images in args
     )
 
-def printFirst64(x,y):
-    plt.figure(figsize=(15,15))
-    plt.rcParams['image.cmap'] = 'gray'
-    # Loop over the first 64 images
-    for i in range(64):
-        # Create a subplot for each image
-        
+# Function displays images and corresponding labels from CIFAR-10 dataset
+# Can specify the number of images and if it's a certain class
+def displayImages(n:int,x,y,c=None):
+    plt.figure(figsize=(14,14))
+    if c != None:
+        indices = np.where(y == c)
+        x = x[indices]
+        y=y[indices]
+    for i in range(min(n,len(y))):
         plt.subplot(8, 8, i+1)
         plt.xticks([])
         plt.yticks([])
@@ -70,4 +86,6 @@ def printFirst64(x,y):
         c = plt.imshow(x[i])
 
         # Set the label as the title
-        plt.title(class_names[y[i]], fontsize=12)
+        plt.title(class_names[y[i]], fontsize=10)
+    
+    plt.tight_layout()
